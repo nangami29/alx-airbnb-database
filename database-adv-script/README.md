@@ -38,3 +38,31 @@ These queries are designed for practice and to better understand how different t
 - It references columns from the outer query.
 - It runs once for *each row* processed by the outer query.
 - This can be less efficient but is very powerful.
+
+## Aggregation with COUNT and GROUP BY ---
+
+- Objective: Find the total number of bookings made by each user.
+
+- How it works:
+ 1. `JOIN users...`: Gets the readable username.
+ 2. `COUNT(b.booking_id)`: Counts the bookings.
+ 3. `GROUP BY u.user_id, u.username`: Creates a separate "bucket"
+-  for each user and counts the bookings *within* that bucket.
+
+  # window Function (RANK) 
+
+- Objective: Rank properties based on the total number of bookings.
+
+- How it works:
+ 1. `WITH property_booking_counts AS (...)`: This is a
+   Common Table Expression (CTE). It's a temporary result set. We first calculate the number of bookings for *all* properties,
+-   using a LEFT JOIN to include properties with 0 bookings.
+2. `SELECT ...`: The main query selects from the `property` table.
+ 3. `JOIN property_booking_counts...`: We join our main table
+   with the temporary CTE to get the booking counts.
+ 4. `RANK() OVER (ORDER BY c.booking_count DESC) AS property_rank`:
+   - This is the window function.
+   - It does *not* collapse rows; it adds a new column.
+   - `OVER (ORDER BY c.booking_count DESC)` tells the function
+     to assign ranks (1, 2, 3...) based on the booking count
+     in descending order.
